@@ -63,36 +63,38 @@ local on_surface_created = function(event)
 	end
 end
 -----------------------------------------------------------------------
-local change_seed = function()
-	local rng = math.random(1111, 4294967295)
-	local mgs = game.surfaces["nauvis"].map_gen_settings
-	mgs.seed = rng
-	game.surfaces["nauvis"].map_gen_settings = mgs
-	if game.surfaces["vulcanus"] ~= nil then
-	local mgs = game.surfaces["vulcanus"].map_gen_settings
-	mgs.seed = rng
-	game.surfaces["vulcanus"].map_gen_settings = mgs
-	end
-	if game.surfaces["gleba"] ~= nil then
-	local mgs = game.surfaces["gleba"].map_gen_settings
-	mgs.seed = rng
-	game.surfaces["gleba"].map_gen_settings = mgs
-	end
-	if game.surfaces["fulgora"] ~= nil then
-	local mgs = game.surfaces["fulgora"].map_gen_settings
-	mgs.seed = rng
-	game.surfaces["fulgora"].map_gen_settings = mgs
-	end
-	if game.surfaces["aquilo"] ~= nil then
-	local mgs = game.surfaces["aquilo"].map_gen_settings
-	mgs.seed = rng
-	game.surfaces["aquilo"].map_gen_settings = mgs
-	end
+local change_seed = function(seed)
+    local rng = seed or math.random(1111, 4294967295)
+    local mgs = game.surfaces["nauvis"].map_gen_settings
+    mgs.seed = rng
+	--game.print("Resetting. Changing seed to: " .. rng)
+    game.surfaces["nauvis"].map_gen_settings = mgs
+    if game.surfaces["vulcanus"] ~= nil then
+        local mgs = game.surfaces["vulcanus"].map_gen_settings
+        mgs.seed = rng
+        game.surfaces["vulcanus"].map_gen_settings = mgs
+    end
+    if game.surfaces["gleba"] ~= nil then
+        local mgs = game.surfaces["gleba"].map_gen_settings
+        mgs.seed = rng
+        game.surfaces["gleba"].map_gen_settings = mgs
+    end
+    if game.surfaces["fulgora"] ~= nil then
+        local mgs = game.surfaces["fulgora"].map_gen_settings
+        mgs.seed = rng
+        game.surfaces["fulgora"].map_gen_settings = mgs
+    end
+    if game.surfaces["aquilo"] ~= nil then
+        local mgs = game.surfaces["aquilo"].map_gen_settings
+        mgs.seed = rng
+        game.surfaces["aquilo"].map_gen_settings = mgs
+    end
 end
 
 local place_turret_at_spawn = function()
-        local turret = game.surfaces[1].create_entity{name="gun-turret",position={-7,2},force="player"}
+        local turret = game.surfaces[1].create_entity{name="gun-turret",position={-7,2},force="player", quality = "legendary"}
         turret.insert{name="firearm-magazine",count=100}
+		turret.minable = false
         local wall = game.surfaces[1].create_entity
         wall{name="stone-wall",position={-9,0},force="player"}
         wall{name="stone-wall",position={-8,0},force="player"}
@@ -109,33 +111,33 @@ local place_turret_at_spawn = function()
 end
     
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-function reset()
+function reset(seed)
     local science = game.forces["player"].get_item_production_statistics(1).get_input_count "science"
-        if (science > 0) then
-            local minutes = math.floor(game.ticks_played / 3600)
-            local victory = storage.victory
-            local log_message = string.format("%s_%d_%d", tostring(victory), science, minutes)
-            helpers.write_file("reset/reset.log", log_message, false, 0)
-        end
-	change_seed()
-	-- We clear the main surfaces instead of deleting them because the seed can't be changed if they are deleted..
-	game.surfaces["nauvis"].clear(true)
-	if game.surfaces["vulcanus"] ~= nil then
-	game.surfaces["vulcanus"].clear(true)
-	end
-	if game.surfaces["gleba"] ~= nil then
-	game.surfaces["gleba"].clear(true)
-	end
-	if game.surfaces["fulgora"] ~= nil then
-	game.surfaces["fulgora"].clear(true)
-	end
-	if game.surfaces["aquilo"] ~= nil then
-	game.surfaces["aquilo"].clear(true)
-	end
-	-- We delete space platforms
-	for _, platform in pairs(game.forces["player"].platforms) do
-		platform.destroy(1)
-	end
+    if (science > 0) then
+        local minutes = math.floor(game.ticks_played / 3600)
+        local victory = storage.victory
+        local log_message = string.format("%s_%d_%d", tostring(victory), science, minutes)
+        helpers.write_file("reset/reset.log", log_message, false, 0)
+    end
+    change_seed(seed)
+    -- We clear the main surfaces instead of deleting them because the seed can't be changed if they are deleted..
+    game.surfaces["nauvis"].clear(true)
+    if game.surfaces["vulcanus"] ~= nil then
+        game.surfaces["vulcanus"].clear(true)
+    end
+    if game.surfaces["gleba"] ~= nil then
+        game.surfaces["gleba"].clear(true)
+    end
+    if game.surfaces["fulgora"] ~= nil then
+        game.surfaces["fulgora"].clear(true)
+    end
+    if game.surfaces["aquilo"] ~= nil then
+        game.surfaces["aquilo"].clear(true)
+    end
+    -- We delete space platforms
+    for _, platform in pairs(game.forces["player"].platforms) do
+        platform.destroy(1)
+    end
 end
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 local on_pre_surface_cleared = function(event)
@@ -345,16 +347,21 @@ end
 -------------------------------------------------------------------
 script.on_nth_tick(3600, function()
     if math.random(1, 5) == 1 then
-    game.map_settings.asteroids.spawning_rate = 10
+	    game.map_settings.asteroids.spawning_rate = 10
     else
-    game.map_settings.asteroids.spawning_rate = 0.1
+		game.map_settings.asteroids.spawning_rate = 0.1
+
+		if (game.forces["player"].technologies["electronics"].researched or game.forces["player"].technologies["steam-power"].researched) then
+			local ex = game.map_settings.enemy_expansion
+			if ex.settler_group_min_size < 90 then
+				ex.settler_group_min_size = ex.settler_group_min_size + 1
+				ex.settler_group_max_size = ex.settler_group_max_size + 1
+			end	
+		end
+
     end
+	
 	local evo = game.forces["enemy"].get_evolution_factor(1)
-	local ex = game.map_settings.enemy_expansion
-	if ex.settler_group_min_size < 90 then
-	ex.settler_group_min_size = ex.settler_group_min_size + 1
-	ex.settler_group_max_size = ex.settler_group_max_size + 1
-	end
     if evo > 0.2 and evo < 0.6 then
     game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = 0.5
     end
