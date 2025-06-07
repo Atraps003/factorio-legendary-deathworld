@@ -108,7 +108,7 @@ local place_turret_at_spawn = function()
         wall{name="stone-wall",position={-9,1},force="player"}
 end
     
----------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 function reset()
     local science = game.forces["player"].get_item_production_statistics(1).get_input_count "science"
         if (science > 0) then
