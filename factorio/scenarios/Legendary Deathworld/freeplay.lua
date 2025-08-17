@@ -444,6 +444,15 @@ local on_space_platform_changed_state = function(event)
 		end
 	end
 end
+
+-------------------------------------------------------------------
+
+script.on_event(defines.events.on_player_used_capsule, function(e)
+    if e.item.name ~= 'artillery-targeting-remote' then return end
+    local player = game.get_player(e.player_index)
+    log(player.name .. ' used artillery targeting remote at ' .. e.position.x .. ', ' .. e.position.y)
+end)
+
 -------------------------------------------------------------------
 
 local on_player_created = function(event)
