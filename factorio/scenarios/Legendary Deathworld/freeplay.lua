@@ -12,8 +12,7 @@ end
 local respawn_items = function()
   return
   {
-    ["pistol"] = 1,
-    ["firearm-magazine"] = 10
+    ["pistol"] = 1
   }
 end
 
@@ -176,7 +175,7 @@ local on_surface_cleared = function(event)
 	game.map_settings.enemy_expansion.settler_group_min_size = 5
 	game.map_settings.enemy_expansion.settler_group_max_size = 6
 	game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = 1
-    game.map_settings.enemy_evolution.time_factor = 0.000002
+    game.map_settings.enemy_evolution.time_factor = 0.00002
 	game.forces["player"].reset()
 	game.forces["enemy"].reset()
 	game.forces["enemy"].reset_evolution()
@@ -386,9 +385,9 @@ local on_biter_base_built = function(event)
 end
 -------------------------------------------------------------------
 script.on_nth_tick(3600, function()
-    	if math.random(1, 5) == 1 then
+    if math.random(1, 5) == 1 then
 	game.map_settings.asteroids.spawning_rate = 10
-    	else
+    else
 	game.map_settings.asteroids.spawning_rate = 1
 	end
 
@@ -400,8 +399,9 @@ script.on_nth_tick(3600, function()
 	end
 	end
 	
+    -- starting time evo is deathworld default of 0.00002
 	local evo = game.forces["enemy"].get_evolution_factor(1)
-    	if evo > 0.2 and evo < 0.6 then
+    if evo > 0.2 and evo < 0.6 then
 	storage.quality = "legendary"
  	game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = 0.5
    	end
@@ -413,7 +413,7 @@ script.on_nth_tick(3600, function()
 	if evo > 0.7 and evo < 0.8 then
 	storage.strafer = "big-strafer-pentapod"
 	storage.stomper = "big-stomper-pentapod"
-    game.map_settings.enemy_evolution.time_factor = 0.00001
+    game.map_settings.enemy_evolution.time_factor = 0.0002
 	end
 	if evo > 0.85 and evo < 0.95 then
 	storage.demo_quality = "legendary"
