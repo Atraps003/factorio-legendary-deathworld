@@ -45,6 +45,7 @@ storage.demo_quality = "normal"
 storage.demo = "small-demolisher"
 storage.recently_reset = "false"
 storage.victory = false
+storage.nested_recently = false
 storage.nesting_spot = {{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}}
 -----------------------------------------------------
 local on_chunk_generated = function(event)
@@ -62,6 +63,15 @@ local on_surface_created = function(event)
 	mgs.no_enemies_mode = true
 	game.surfaces["vulcanus"].map_gen_settings = mgs
 	end
+    if game.surfaces["aquilo"] ~= nil then
+    game.surfaces["aquilo"].global_effect = {quality = 4}
+    -- game.surfaces["aquilo"].brightness_visual_weights = { 1, 1, 1 }
+    -- game.surfaces["aquilo"].dawn = 0.98
+    -- game.surfaces["aquilo"].dusk = 0.02
+    -- game.surfaces["aquilo"].evening = 0.12
+    -- game.surfaces["aquilo"]. morning = 0.88
+    end
+    
 end
 -----------------------------------------------------------------------
 local change_seed = function()
@@ -185,6 +195,19 @@ local on_surface_cleared = function(event)
 	if game.surfaces["gleba"] ~= nil then
 	game.get_pollution_statistics("gleba").clear()
 	end
+    if math.random(1,2) == 1 then
+		--pitch black nights
+        game.surfaces[1].daytime_parameters = {dawn = 0.95, dusk = 0.05, evening = 0.15, morning = 0.85}
+		game.surfaces[1].brightness_visual_weights = { 1, 1, 1 }
+		game.surfaces[1].min_brightness = 0
+		game.surfaces[1].daytime = 0.84
+	else
+		--default nights
+        game.surfaces[1].daytime_parameters = {dawn = 0.75, dusk = 0.25, evening = 0.45, morning = 0.55}
+		game.surfaces[1].brightness_visual_weights = { 0, 0, 0 }
+		game.surfaces[1].min_brightness = 0.15
+		game.surfaces[1].daytime = 0.75
+	end
 	end
 end
 ------------------------------------------------------------------------------------------------
@@ -232,27 +255,16 @@ local on_research_finished = function(event)
 	if (event.research.name == "refined-flammables-6") then
 		game.forces["player"].set_turret_attack_modifier("flamethrower-turret", 0)
 	end
-    if (event.research.name == "stronger-explosives-2") then
-		game.forces["player"].set_ammo_damage_modifier("landmine", 0)
-	end
-    if (event.research.name == "stronger-explosives-3") then
-		game.forces["player"].set_ammo_damage_modifier("landmine", 0)
-	end
-    if (event.research.name == "stronger-explosives-4") then
-		game.forces["player"].set_ammo_damage_modifier("landmine", 0)
-	end
-    if (event.research.name == "stronger-explosives-5") then
-		game.forces["player"].set_ammo_damage_modifier("landmine", 0)
-	end
-    if (event.research.name == "stronger-explosives-6") then
-		game.forces["player"].set_ammo_damage_modifier("landmine", 0)
-	end
+    -- if (event.research.name == "stronger-explosives-2") then
+	-- 	game.forces["player"].set_ammo_damage_modifier("landmine", 0)
+	-- end
 	if (event.research.name == "laser") then
-		game.forces["player"].recipes["laser-turret"].productivity_bonus = 3
+		game.forces["player"].recipes["laser-turret"].productivity_bonus = 1
+        game.forces["player"].set_gun_speed_modifier("laser", 2)
 	end
     if (event.research.name == "defender") then
-		game.forces["player"].recipes["defender-capsule"].productivity_bonus = 3
-        game.forces["player"].following_robots_lifetime_modifier = 3
+		game.forces["player"].recipes["defender-capsule"].productivity_bonus = 1
+        game.forces["player"].following_robots_lifetime_modifier = 4
 	end
 end
 ------------------------------------------------------------------------------------------------
@@ -293,7 +305,7 @@ end
 script.set_event_filter(defines.events.on_post_entity_died, {{filter = "type", type = "unit-spawner"}, {filter = "type", type = "land-mine"}})
 ------------------------------------------------------------
 local on_unit_group_finished_gathering = function(event)
-	if math.random(1, 8) ~= 1 then
+	if storage.nested_recently == true then
 		local command = {
 		type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={
 		{type = defines.command.go_to_location,destination = {0, 0}},
@@ -373,6 +385,7 @@ local on_unit_group_finished_gathering = function(event)
 end
 -------------------------------------------------------------------
 local on_biter_base_built = function(event)
+    storage.nested_recently = true
 	local x = event.entity.position.x
 	local y = event.entity.position.y
 	if (x > -34 and x < 34 and y > -34 and y < 34) then
@@ -385,6 +398,8 @@ local on_biter_base_built = function(event)
 end
 -------------------------------------------------------------------
 script.on_nth_tick(3600, function()
+    storage.nested_recently = false
+
     if math.random(1, 5) == 1 then
 	game.map_settings.asteroids.spawning_rate = 10
     else
@@ -418,9 +433,11 @@ script.on_nth_tick(3600, function()
 	if evo > 0.85 and evo < 0.95 then
 	storage.demo_quality = "legendary"
 	game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = 0.125
+    game.map_settings.enemy_evolution.time_factor = 0.0004
 	end
 	if evo > 0.95 and evo < 0.97 then
 	storage.demo = "medium-demolisher"
+    game.map_settings.enemy_evolution.time_factor = 0.0008
 	end
 	if evo > 0.97 and evo < 0.98 then
 	storage.demo = "big-demolisher"
@@ -443,6 +460,15 @@ local on_space_platform_changed_state = function(event)
             storage.victory = true
 		end
 	end
+    -- if event.platform.space_connection ~= nil then
+    --     if event.platform.space_connection.length > 90000 then
+    --         game.surfaces[event.platform.surface.index].daytime = 0.5
+    --         game.surfaces[event.platform.surface.index].brightness_visual_weights = { 1, 1, 1 }
+    --     elseif event.platform.space_connection.length < 90000 then
+    --         game.surfaces[event.platform.surface.index].daytime = 1
+    --         game.surfaces[event.platform.surface.index].brightness_visual_weights = { 0, 0, 0 }
+    --     end
+    -- end
 end
 
 -------------------------------------------------------------------
@@ -474,8 +500,6 @@ local on_player_created = function(event)
     game.permissions.get_group('Default').set_allows_action(defines.input_action.toggle_map_editor, false)
     game.permissions.get_group('Default').set_allows_action(defines.input_action.change_multiplayer_config, false)
     game.permissions.get_group('Default').set_allows_action(defines.input_action.cheat, false)
-    game.permissions.create_group('All')
-    -- game.permissions.get_group('All').add_player("Atraps003")
 
     if not storage.disable_crashsite then
       local surface = player.surface
