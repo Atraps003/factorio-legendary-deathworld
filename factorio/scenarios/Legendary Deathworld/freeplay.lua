@@ -219,7 +219,7 @@ local on_player_respawned = function(event)
 		surface.request_to_generate_chunks({0, 0}, 6)
 		surface.force_generate_chunk_requests()
 		crash_site.create_crash_site(surface, {-5,-6}, util.copy(storage.crashed_ship_items), util.copy(storage.crashed_debris_items), util.copy(storage.crashed_ship_parts))
-		game.forces["player"].chart(surface, {{x = -200, y = -200}, {x = 200, y = 200}})
+		game.forces["player"].chart(surface, {{x = -600, y = -600}, {x = 600, y = 600}})
 		game.forces["enemy"].friendly_fire = false
 		util.insert_safe(player, storage.created_items)
         	place_turret_at_spawn()
@@ -490,7 +490,7 @@ local on_player_created = function(event)
     --This is so that other mods and scripts have a chance to do remote calls before we do things like charting the starting area, creating the crash site, etc.
     storage.init_ran = true
 
-    game.forces["player"].chart(game.surfaces[1], {{x = -200, y = -200}, {x = 200, y = 200}})
+    game.forces["player"].chart(game.surfaces[1], {{x = -600, y = -600}, {x = 600, y = 600}})
     game.forces["enemy"].friendly_fire = false
     game.permissions.get_group('Default').set_allows_action(defines.input_action.add_permission_group, false)
     game.permissions.get_group('Default').set_allows_action(defines.input_action.delete_permission_group, false)
