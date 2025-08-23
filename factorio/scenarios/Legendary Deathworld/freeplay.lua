@@ -266,6 +266,7 @@ local on_research_finished = function(event)
 		game.forces["player"].recipes["defender-capsule"].productivity_bonus = 1
         game.forces["player"].following_robots_lifetime_modifier = 4
 	end
+    log(event.research.name .. ' research completed')
 end
 ------------------------------------------------------------------------------------------------
 script.on_event(defines.events.on_entity_died,
@@ -445,6 +446,8 @@ script.on_nth_tick(3600, function()
 	if evo > 0.98 then
 	storage.demo_rng = 5
 	end
+    log('Minutes passed ' .. math.floor(game.ticks_played / 3600))
+    log('Nauvis - Evolution factor: ' .. game.forces["enemy"].get_evolution_factor("nauvis") .. ' Time: ' .. game.forces["enemy"].get_evolution_factor_by_time("nauvis") .. ' Pollution: ' .. game.forces["enemy"].get_evolution_factor_by_pollution("nauvis") .. ' Spawner: ' .. game.forces["enemy"].get_evolution_factor_by_killing_spawners("nauvis"))
 end)
 -------------------------------------------------------------------
 local on_space_platform_changed_state = function(event)
