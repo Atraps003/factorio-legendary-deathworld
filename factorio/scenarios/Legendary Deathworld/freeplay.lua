@@ -381,11 +381,11 @@ local on_unit_group_finished_gathering = function(event)
 		{type = defines.command.go_to_location,destination = {storage.nesting_spot[1][1], storage.nesting_spot[1][2]},distraction = defines.distraction.none},
 		{type = defines.command.build_base,destination = {storage.nesting_spot[1][1], storage.nesting_spot[1][2]},distraction = defines.distraction.none,ignore_planner = true}}}
 		event.group.set_command(command)
+		storage.nested_recently = true
 	end
 end
 -------------------------------------------------------------------
 local on_biter_base_built = function(event)
-    storage.nested_recently = true
 	local x = event.entity.position.x
 	local y = event.entity.position.y
 	if (x > -34 and x < 34 and y > -34 and y < 34) then
