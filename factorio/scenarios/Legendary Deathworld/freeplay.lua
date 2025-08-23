@@ -195,7 +195,7 @@ local on_surface_cleared = function(event)
 	if game.surfaces["gleba"] ~= nil then
 	game.get_pollution_statistics("gleba").clear()
 	end
-    if math.random(1,2) == 1 then
+    if math.random(1,5) == 1 then
 		--pitch black nights
         game.surfaces[1].daytime_parameters = {dawn = 0.95, dusk = 0.05, evening = 0.15, morning = 0.85}
 		game.surfaces[1].brightness_visual_weights = { 1, 1, 1 }
@@ -216,10 +216,10 @@ local on_player_respawned = function(event)
 	if storage.recently_reset == "true" then
 		storage.recently_reset = "false"
 		local surface = game.surfaces[1]
-		surface.request_to_generate_chunks({0, 0}, 6)
+		surface.request_to_generate_chunks({0, 0}, 19)
 		surface.force_generate_chunk_requests()
 		crash_site.create_crash_site(surface, {-5,-6}, util.copy(storage.crashed_ship_items), util.copy(storage.crashed_debris_items), util.copy(storage.crashed_ship_parts))
-		game.forces["player"].chart(surface, {{x = -600, y = -600}, {x = 600, y = 600}})
+		game.forces["player"].chart_all("nauvis")
 		game.forces["enemy"].friendly_fire = false
 		util.insert_safe(player, storage.created_items)
         	place_turret_at_spawn()
@@ -480,6 +480,11 @@ script.on_event(defines.events.on_player_used_capsule, function(e)
 end)
 
 -------------------------------------------------------------------
+local on_player_flushed_fluid = function(event)
+    local player = game.get_player(event.player_index)
+    log(player.name .. ' flushed fluid ' .. event.fluid .. ' amount ' .. event.amount .. ' from entity ' .. event.entity.name .. ' at ' .. event.entity.gps_tag)
+end
+-------------------------------------------------------------------
 
 local on_player_created = function(event)
   local player = game.get_player(event.player_index)
@@ -490,7 +495,6 @@ local on_player_created = function(event)
     --This is so that other mods and scripts have a chance to do remote calls before we do things like charting the starting area, creating the crash site, etc.
     storage.init_ran = true
 
-    game.forces["player"].chart(game.surfaces[1], {{x = -600, y = -600}, {x = 600, y = 600}})
     game.forces["enemy"].friendly_fire = false
     game.permissions.get_group('Default').set_allows_action(defines.input_action.add_permission_group, false)
     game.permissions.get_group('Default').set_allows_action(defines.input_action.delete_permission_group, false)
@@ -503,6 +507,9 @@ local on_player_created = function(event)
 
     if not storage.disable_crashsite then
       local surface = player.surface
+      surface.request_to_generate_chunks({0, 0}, 19)
+      surface.force_generate_chunk_requests()
+      game.forces["player"].chart_all("nauvis")
       surface.daytime = 0.7
       crash_site.create_crash_site(surface, {-5,-6}, util.copy(storage.crashed_ship_items), util.copy(storage.crashed_debris_items), util.copy(storage.crashed_ship_parts))
       place_turret_at_spawn()
@@ -622,6 +629,7 @@ freeplay.events =
   [defines.events.on_unit_group_finished_gathering] = on_unit_group_finished_gathering,
   [defines.events.on_biter_base_built] = on_biter_base_built,
   [defines.events.on_space_platform_changed_state] = on_space_platform_changed_state,
+  [defines.events.on_player_flushed_fluid] = on_player_flushed_fluid,
   [defines.events.on_player_display_resolution_changed] = on_player_display_refresh,
   [defines.events.on_player_display_scale_changed] = on_player_display_refresh
 }
