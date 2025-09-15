@@ -182,8 +182,8 @@ local on_surface_cleared = function(event)
 	storage.demo_quality = "normal"
 	storage.demo = "small-demolisher"
     storage.victory = false
-	game.map_settings.enemy_expansion.settler_group_min_size = 5
-	game.map_settings.enemy_expansion.settler_group_max_size = 6
+	game.map_settings.enemy_expansion.settler_group_min_size = 8
+	game.map_settings.enemy_expansion.settler_group_max_size = 9
 	game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = 1
     game.map_settings.enemy_evolution.time_factor = 0.00002
 	game.forces["player"].reset()
@@ -267,6 +267,8 @@ local on_research_finished = function(event)
         game.forces["player"].following_robots_lifetime_modifier = 4
 	end
     log(event.research.name .. ' research completed')
+	log('Nauvis - Evolution factor: ' .. game.forces["enemy"].get_evolution_factor("nauvis") .. ' Time: ' .. game.forces["enemy"].get_evolution_factor_by_time("nauvis") .. ' Pollution: ' .. game.forces["enemy"].get_evolution_factor_by_pollution("nauvis") .. ' Spawner: ' .. game.forces["enemy"].get_evolution_factor_by_killing_spawners("nauvis"))
+	log('Minutes passed ' .. math.floor(game.ticks_played / 3600))
 end
 ------------------------------------------------------------------------------------------------
 script.on_event(defines.events.on_entity_died,
@@ -392,7 +394,7 @@ local on_biter_base_built = function(event)
 	if (x > -34 and x < 34 and y > -34 and y < 34) then
 		game.print("[color=acid][font=default-large-bold]Biter nests growing near spawn. Defeat imminent![/font][/color]")
 		local nest_count = game.surfaces[1].count_entities_filtered{area={left_top = {x = -32, y = -32}, right_bottom = {x = 32, y = 32}},type={"turret","unit-spawner"}}
-		if nest_count > 3 or game.ticks_played < 18000 then
+		if nest_count > 3 or game.ticks_played < 36000 then
 			reset()
 		end
 	end
@@ -446,8 +448,7 @@ script.on_nth_tick(3600, function()
 	if evo > 0.98 then
 	storage.demo_rng = 5
 	end
-    log('Minutes passed ' .. math.floor(game.ticks_played / 3600))
-    log('Nauvis - Evolution factor: ' .. game.forces["enemy"].get_evolution_factor("nauvis") .. ' Time: ' .. game.forces["enemy"].get_evolution_factor_by_time("nauvis") .. ' Pollution: ' .. game.forces["enemy"].get_evolution_factor_by_pollution("nauvis") .. ' Spawner: ' .. game.forces["enemy"].get_evolution_factor_by_killing_spawners("nauvis"))
+    
 end)
 -------------------------------------------------------------------
 local on_space_platform_changed_state = function(event)
