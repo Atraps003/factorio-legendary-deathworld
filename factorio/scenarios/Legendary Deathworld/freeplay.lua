@@ -185,7 +185,7 @@ local on_surface_cleared = function(event)
 	game.map_settings.enemy_expansion.settler_group_min_size = 8
 	game.map_settings.enemy_expansion.settler_group_max_size = 9
 	game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = 1
-    game.map_settings.enemy_evolution.time_factor = 0.00002
+    game.map_settings.enemy_evolution.time_factor = 0.00004
 	game.forces["player"].reset()
 	game.forces["enemy"].reset()
 	game.forces["enemy"].reset_evolution()
@@ -286,7 +286,7 @@ function(event)
     end
 end
 )
-script.set_event_filter(defines.events.on_entity_died, {{filter = "name", name = "medium-spitter"}, {filter = "name", name = "huge-metallic-asteroid"}, {filter = "name", name = "huge-carbonic-asteroid"}, {filter = "name", name = "huge-oxide-asteroid"}})
+script.set_event_filter(defines.events.on_entity_died, {{filter = "name", name = "behemoth-spitter"}, {filter = "name", name = "huge-metallic-asteroid"}, {filter = "name", name = "huge-carbonic-asteroid"}, {filter = "name", name = "huge-oxide-asteroid"}})
 ------------------------------------------------------------------------------------------------
 script.on_event(defines.events.on_post_entity_died,
 function(event)
@@ -417,16 +417,18 @@ script.on_nth_tick(3600, function()
 	end
 	end
 	
-    -- starting time evo is deathworld default of 0.00002
+    -- starting time evo is 0.00004
 	local evo = game.forces["enemy"].get_evolution_factor(1)
     if evo > 0.2 and evo < 0.6 then
 	storage.quality = "legendary"
  	game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = 0.5
+	game.map_settings.enemy_evolution.time_factor = 0.00005
    	end
 	if evo > 0.6 and evo < 0.7 then
 	game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = 0.25
 	storage.strafer = "medium-strafer-pentapod"
 	storage.stomper = "medium-stomper-pentapod"
+	game.map_settings.enemy_evolution.time_factor = 0.00009
 	end
 	if evo > 0.7 and evo < 0.8 then
 	storage.strafer = "big-strafer-pentapod"
