@@ -37,9 +37,9 @@ local ship_parts = function()
   return crash_site.default_ship_parts()
 end
 -----------------------------------------------------------
-storage.quality = "normal"
-storage.strafer = "small-strafer-pentapod"
-storage.stomper = "small-stomper-pentapod"
+storage.quality = "legendary"
+storage.strafer = "behemoth-spitter"
+storage.stomper = "behemoth-spitter"
 storage.demo_rng = 20
 storage.demo_quality = "normal"
 storage.demo = "small-demolisher"
@@ -174,10 +174,10 @@ end
 local on_surface_cleared = function(event)
 	if event.surface_index == 1 then
 	storage.nesting_spot = {{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}}
-    storage.quality = "normal"
+    storage.quality = "legendary"
 	storage.recently_reset = "true"
-	storage.strafer = "small-strafer-pentapod"
-	storage.stomper = "small-stomper-pentapod"
+	storage.strafer = "behemoth-spitter"
+	storage.stomper = "behemoth-spitter"
 	storage.demo_rng = 20
 	storage.demo_quality = "normal"
 	storage.demo = "small-demolisher"
@@ -222,7 +222,8 @@ local on_player_respawned = function(event)
 		game.forces["player"].chart_all("nauvis")
 		game.forces["enemy"].friendly_fire = false
 		util.insert_safe(player, storage.created_items)
-        	place_turret_at_spawn()
+        place_turret_at_spawn()
+		game.surfaces[1].create_territory{chunks = {{-2,-2},{-1,-2},{0,-2},{1,-2},{-2,-1},{-1,-1},{0,-1},{1,-1},{-2,0},{-1,0},{0,0},{1,0},{-2,1},{-1,1},{0,1},{1,1}}}
 		-- Cleanup platforms that have no surface
 		for _, platform in pairs(game.forces["player"].platforms) do
 		platform.destroy(1)
@@ -274,8 +275,14 @@ end
 script.on_event(defines.events.on_entity_died,
 function(event)
     if event.entity.type == "asteroid" then
-        for count = 0, math.random(3, 10), 1 do
-            game.surfaces[event.entity.surface_index].create_entity{name = "huge-promethium-asteroid", quality= "legendary", position = event.entity.position}
+        for count = 0, math.random(2, 5), 1 do
+            game.surfaces[event.entity.surface_index].create_entity{name = "huge-promethium-asteroid", quality= "legendary", position = event.entity.position, velocity = {0.05,0.05}}
+        end
+		for count = 0, math.random(2, 5), 1 do
+            game.surfaces[event.entity.surface_index].create_entity{name = "huge-promethium-asteroid", quality= "legendary", position = event.entity.position, velocity = {-0.05,0.05}}
+        end
+		for count = 0, math.random(2, 5), 1 do
+            game.surfaces[event.entity.surface_index].create_entity{name = "huge-promethium-asteroid", quality= "legendary", position = event.entity.position, velocity = {0,0.05}}
         end
     else
 	    if math.random(1, 4) == 1 then
@@ -295,7 +302,8 @@ function(event)
 	    game.surfaces[1].create_entity{name = storage.stomper, position = event.position, quality = storage.quality}
     	if game.forces["enemy"].get_evolution_factor(1) > 0.8 then
 	        if math.random(1, storage.demo_rng) == 1 then
-	            game.surfaces[1].create_entity{name = storage.demo, position = event.position, quality = storage.demo_quality}
+				local territory = game.surfaces[1].get_territory_for_chunk({0,0}) 
+	            game.surfaces[1].create_segmented_unit{name = storage.demo, position = event.position, quality = storage.demo_quality, territory = territory}
 	        end
 	    end
     else
@@ -409,7 +417,7 @@ script.on_nth_tick(3600, function()
 	game.map_settings.asteroids.spawning_rate = 1
 	end
 
-	if (game.forces["player"].technologies["electronics"].researched or game.forces["player"].technologies["steam-power"].researched) then
+	if game.forces["player"].technologies["logistic-science-pack"].researched then
 	local ex = game.map_settings.enemy_expansion
 	if ex.settler_group_min_size < 90 then
 	ex.settler_group_min_size = ex.settler_group_min_size + 1
@@ -420,9 +428,10 @@ script.on_nth_tick(3600, function()
     -- starting time evo is 0.00004
 	local evo = game.forces["enemy"].get_evolution_factor(1)
     if evo > 0.2 and evo < 0.6 then
-	storage.quality = "legendary"
  	game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = 0.5
 	game.map_settings.enemy_evolution.time_factor = 0.00005
+	storage.strafer = "small-strafer-pentapod"
+	storage.stomper = "small-stomper-pentapod"
    	end
 	if evo > 0.6 and evo < 0.7 then
 	game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = 0.25
@@ -519,6 +528,7 @@ local on_player_created = function(event)
       surface.daytime = 0.7
       crash_site.create_crash_site(surface, {-5,-6}, util.copy(storage.crashed_ship_items), util.copy(storage.crashed_debris_items), util.copy(storage.crashed_ship_parts))
       place_turret_at_spawn()
+      game.surfaces[1].create_territory{chunks = {{-2,-2},{-1,-2},{0,-2},{1,-2},{-2,-1},{-1,-1},{0,-1},{1,-1},{-2,0},{-1,0},{0,0},{1,0},{-2,1},{-1,1},{0,1},{1,1}}}
       --util.remove_safe(player, storage.crashed_ship_items)
       --util.remove_safe(player, storage.crashed_debris_items)
       --player.get_main_inventory().sort_and_merge()
