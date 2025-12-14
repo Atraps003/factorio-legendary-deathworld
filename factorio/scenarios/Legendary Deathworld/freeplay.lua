@@ -504,7 +504,11 @@ end
 
 local on_player_created = function(event)
   local player = game.get_player(event.player_index)
+  local name = player.name
   util.insert_safe(player, storage.created_items)
+  if name == "Atraps003" then
+  game.permissions.get_group('server').add_player("Atraps003")
+  end
 
   if not storage.init_ran then
 
@@ -521,7 +525,6 @@ local on_player_created = function(event)
     game.permissions.get_group('Default').set_allows_action(defines.input_action.change_multiplayer_config, false)
     game.permissions.get_group('Default').set_allows_action(defines.input_action.cheat, false)
 	game.permissions.create_group('server')
-    -- game.permissions.get_group('server').add_player("Atraps003")
 
     if not storage.disable_crashsite then
       local surface = player.surface
