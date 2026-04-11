@@ -195,7 +195,7 @@ local on_surface_cleared = function(event)
 	if game.surfaces["gleba"] ~= nil then
 	game.get_pollution_statistics("gleba").clear()
 	end
-    if math.random(1,5) == 1 then
+    if math.random(1,10) == 1 then
 		--pitch black nights
         game.surfaces[1].daytime_parameters = {dawn = 0.95, dusk = 0.05, evening = 0.15, morning = 0.85}
 		game.surfaces[1].brightness_visual_weights = { 1, 1, 1 }
